@@ -78,7 +78,7 @@ const deleteById = async (req, res)=>{
             console.log(__basedir + result.coverImage);
             fs.unlinkSync(__basedir + result.coverImage);
             console.log('deleted');
-            res.json({ message: `${result.comic} issue  ${result.issue} has been removed, and ${result.coverImage} has been deleted`})
+            res.json({ message: `${result.title} issue  ${result.issue} has been removed, and ${result.coverImage} has been deleted`})
         }
     }
 }
