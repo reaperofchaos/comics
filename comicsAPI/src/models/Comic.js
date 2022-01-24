@@ -24,7 +24,7 @@ var ComicSchema = new Schema({
     imprint:{
         type: String,
     },
-    releaseData: {
+    releaseDate: {
         type: Date,
         min:'1900-01-01',
         max: '2100-01-28'

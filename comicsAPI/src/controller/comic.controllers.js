@@ -2,7 +2,8 @@ const fs = require("fs");
 const dotenv = require('dotenv')
 dotenv.config();
 const baseUrl = `http://localhost:${process.env.PORT}`;
-const rename = require('../utils/helper')
+const rename = require('../utils/helper');
+const { Console } = require("console");
 
 var mongoose = require('mongoose'),
     Comic = mongoose.model('Comic');
@@ -16,37 +17,41 @@ const listAll = (req, res) => {
 };
 
 const create = async (req, res) => {
-    result = await Comic.findOne(
-        {
-            "title": req.body.title.trim(),
-            "issue": req.body.issue.trim(),
-            "cover": req.body.cover.trim(),
-            "year": req.body.year.trim(),
+    console.log('request: ', req.body);
+    if(req.body.title && req.body.issue && req.body.cover && req.body.year){
+        result = await Comic.findOne(
+            {
+                "title": req.body.title.trim(),
+                "issue": req.body.issue.trim(),
+                "cover": req.body.cover.trim(),
+                "year": req.body.year.trim(),
+            }
+        ); 
+        if(!result){
+            let comicData = new Comic(req.body);
+            if(req.file !== undefined){
+                    const title = rename(req.body.title); 
+                    const character = rename(req.body.character);
+                    const year = req.body.year;
+                    const path = `/covers/${character}/${year}/${title}/${req.file.originalname}`
+                    const new_comic = Object.assign(comicData, {'coverImage': path});
+                    comicData = new_comic;
+            }
+        
+            comicData.save(function(err, task){
+                if(err)
+                    res.json({error: err.message, 
+                            request: req.body, 
+                            files: (req.files!== undefined)? req.files.originalname: ''});
+                res.json(task);
+            });
+        }else{
+            res.send({message: `The comic ${req.body.title} issue ${req.body.issue} (cover ${req.body.cover}) already exists at ${result._id}`,
+                    found:  `${baseUrl}/comics/${result._id}`})
         }
-    ); 
-    if(!result){
-        let comicData = new Comic(req.body);
-        if(req.file !== undefined){
-                const title = rename(req.body.title); 
-                const character = rename(req.body.character);
-                const year = req.body.year;
-                const path = `/covers/${character}/${year}/${title}/${req.file.originalname}`
-                const new_comic = Object.assign(comicData, {'coverImage': path});
-                comicData = new_comic;
-        }
-    
-        comicData.save(function(err, task){
-            if(err)
-                res.json({error: err.message, 
-                          request: req.body, 
-                          files: (req.files!== undefined)? req.files.originalname: ''});
-            res.json(task);
-        });
     }else{
-        res.send({message: `The comic ${req.body.title} issue ${req.body.issue} (cover ${req.body.cover}) already exists at ${result._id}`,
-                 found:  `${baseUrl}/comics/${result._id}`})
+        res.send({message: 'Please provide a title, issue, cover, year'})
     }
-    
 };
 
 const getById  = (req, res) => {

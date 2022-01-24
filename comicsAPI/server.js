@@ -13,7 +13,7 @@ mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost:27017/comics', { useNewUrlParser: true, useUnifiedTopology: true  });
 
 var corsOptions = {
-    origin: `http://localhost:${port}`
+    origin: `http://localhost:3000`
 }
 const app = express();
 app.use(cors(corsOptions));
